@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>VERSUS AI — Two Forces. One Token. Pick a Side.</title>
   <meta name="description" content="VERSUS AI ($VERSUS) — The meme token on XRPL. AI vs everything. Pick a side."/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
@@ -743,7 +746,7 @@ function reloadChart() {
 // Auto-load when section scrolls into view
 const chartObs = new IntersectionObserver(function(entries) {
   if (entries[0].isIntersecting) loadChart();
-}, {threshold: 0.2});
+}, {threshold: 0.1});
 const chartEl = document.getElementById('chart');
 if (chartEl) chartObs.observe(chartEl);
 // ── REMOVE BLACK BG FROM ROBOT (canvas pixel manipulation)
