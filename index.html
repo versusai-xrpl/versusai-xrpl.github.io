@@ -779,6 +779,78 @@ if (chartEl) chartObs.observe(chartEl);
   else { img.onload = processImage; }
 })();
 
+// ── PICK A SIDE — real click votes stored in localStorage
+(function() {
+  const BASE_AI    = 1247;
+  const BASE_HUMAN = 1089;
+
+  function getVotes() {
+    return {
+      ai:    BASE_AI    + parseInt(localStorage.getItem('vs_votes_ai')    || '0'),
+      human: BASE_HUMAN + parseInt(localStorage.getItem('vs_votes_human') || '0')
+    };
+  }
+
+  function updateDisplay(v) {
+    const total = v.ai + v.human || 1;
+    const aiPct    = Math.round(v.ai    / total * 100);
+    const humanPct = 100 - aiPct;
+    const aiBar    = document.getElementById('side-ai-bar');
+    const humanBar = document.getElementById('side-human-bar');
+    if (aiBar)    aiBar.style.width    = aiPct + '%';
+    if (humanBar) humanBar.style.width = humanPct + '%';
+    const aiPctEl = document.getElementById('ai-pct');
+    const hPctEl  = document.getElementById('human-pct');
+    if (aiPctEl)  aiPctEl.textContent  = aiPct + '%';
+    if (hPctEl)   hPctEl.textContent   = humanPct + '%';
+    const aiCountEl    = document.getElementById('ai-count');
+    const humanCountEl = document.getElementById('human-count');
+    if (aiCountEl)    aiCountEl.textContent    = v.ai.toLocaleString();
+    if (humanCountEl) humanCountEl.textContent = v.human.toLocaleString();
+    const totalLabel = document.getElementById('total-votes-label');
+    if (totalLabel) totalLabel.textContent = (v.ai + v.human).toLocaleString() + ' VOTES CAST';
+    const winLabel = document.getElementById('winning-label');
+    if (winLabel) {
+      winLabel.textContent = 'winning';
+      winLabel.style.color = aiPct >= humanPct ? 'var(--cyan)' : 'var(--violet)';
+    }
+  }
+
+  const myVote = localStorage.getItem('vs_my_vote');
+  const v = getVotes();
+  setTimeout(() => updateDisplay(v), 500);
+
+  if (myVote) {
+    const btns  = document.getElementById('vote-buttons');
+    const voted = document.getElementById('voted-state');
+    const msg   = document.getElementById('voted-msg');
+    if (btns)  btns.style.display  = 'none';
+    if (voted) voted.style.display = 'block';
+    if (msg)   msg.innerHTML = myVote === 'ai'
+      ? '<span style="color:var(--cyan)">⚡ YOU CHOSE AI.</span> The machine remembers.'
+      : '<span style="color:var(--violet)">🔮 YOU CHOSE HUMAN.</span> Conviction noted.';
+  }
+
+  window.castVote = function(side) {
+    if (localStorage.getItem('vs_my_vote')) return;
+    const key = side === 'ai' ? 'vs_votes_ai' : 'vs_votes_human';
+    localStorage.setItem(key, (parseInt(localStorage.getItem(key)||'0') + 1).toString());
+    localStorage.setItem('vs_my_vote', side);
+    const newV = getVotes();
+    updateDisplay(newV);
+    const bar = document.getElementById(side === 'ai' ? 'side-ai-bar' : 'side-human-bar');
+    if (bar) { bar.style.transform = 'scaleY(1.08)'; setTimeout(() => bar.style.transform = '', 300); }
+    const btns  = document.getElementById('vote-buttons');
+    const voted = document.getElementById('voted-state');
+    const msg   = document.getElementById('voted-msg');
+    if (btns)  btns.style.display  = 'none';
+    if (voted) voted.style.display = 'block';
+    if (msg)   msg.innerHTML = side === 'ai'
+      ? '<span style="color:var(--cyan)">⚡ ALIGNED WITH THE MACHINE.</span><br/>The future is automated — and you just proved it.'
+      : '<span style="color:var(--violet)">🔮 HUMAN FORCE CONFIRMED.</span><br/>Conviction over code. The fight continues.';
+  };
+})();
+
 // ── COUNTDOWN
 let cd=30;
 const cdEl=document.getElementById('refresh-countdown');
