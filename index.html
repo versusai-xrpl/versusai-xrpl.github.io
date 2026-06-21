@@ -125,10 +125,10 @@
     @media(max-width:768px){.floating-buy{right:14px;bottom:14px}.floating-buy .btn-primary{padding:12px 20px;font-size:0.68rem}}
 
     /* PRICE BADGE */
-    .price-badge{display:inline-flex;align-items:center;gap:16px;border:1px solid #00e5ff44;background:#00e5ff0a;border-radius:8px;padding:18px 32px;margin-bottom:36px}
-    .price-label{font-family:'Orbitron',sans-serif;font-size:0.58rem;letter-spacing:0.25em;color:var(--muted);margin-bottom:6px}
-    .price-value{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:var(--cyan);text-shadow:var(--glow-cyan);letter-spacing:0.04em}
-    .price-change{font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:4px}
+    .price-badge{display:inline-flex;align-items:center;gap:13px;border:1px solid #00e5ff36;background:#00e5ff08;border-radius:7px;padding:15px 26px;margin-bottom:28px}
+    .price-label{font-family:'Orbitron',sans-serif;font-size:0.52rem;letter-spacing:0.22em;color:var(--muted);margin-bottom:5px}
+    .price-value{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;color:var(--cyan);text-shadow:0 0 14px #00e5ff55,0 0 36px #00e5ff1a;letter-spacing:0.04em}
+    .price-change{font-family:'Orbitron',sans-serif;font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:4px}
     .price-change.up{background:#00e5ff22;color:var(--cyan)}
 
     /* HERO CTAS */
@@ -307,6 +307,14 @@
   <div class="war-sub">Every wallet strengthens a side.<br>Every buy shifts the balance.</div>
   <div class="war-question">Which side owns the future?</div>
 
+  <div class="hero-status-line">History remembers who chose first.</div>
+
+  <div class="hero-ctas">
+    <a href="#pick-section" onclick="heroPickSide('ai');return false;" class="btn-side-ai">⚡ I Choose AI</a>
+    <a href="#pick-section" onclick="heroPickSide('human');return false;" class="btn-side-human">🧠 I Choose Human</a>
+    <a href="https://firstledger.net/token-v2/rhfxeXv2aKfS4v72aZGUwumnwd9DfQDxdd/5645525355530000000000000000000000000000" target="_blank" class="btn-primary">Buy $VERSUS</a>
+  </div>
+
   <div class="price-badge">
     <div>
       <div class="price-label">LIVE PRICE</div>
@@ -315,13 +323,6 @@
     <div class="price-change up" id="hero-change">● LIVE</div>
   </div>
 
-  <div class="hero-status-line">History remembers who chose first.</div>
-
-  <div class="hero-ctas">
-    <a href="#pick-section" onclick="heroPickSide('ai');return false;" class="btn-side-ai">⚡ I Choose AI</a>
-    <a href="#pick-section" onclick="heroPickSide('human');return false;" class="btn-side-human">🧠 I Choose Human</a>
-    <a href="https://firstledger.net/token-v2/rhfxeXv2aKfS4v72aZGUwumnwd9DfQDxdd/5645525355530000000000000000000000000000" target="_blank" class="btn-primary">Buy $VERSUS</a>
-  </div>
   <div class="hero-activity" id="hero-activity">
     <span class="hero-activity-dot"></span>
     <span id="hero-activity-text">Loading the front line…</span>
@@ -892,7 +893,7 @@ if (chartEl) chartObs.observe(chartEl);
     if (!el) return;
     el.textContent = heroActivityPhase === 0
       ? heroActivityTotal.toLocaleString() + ' wallets have already chosen a side'
-      : 'New participants joining the war';
+      : 'New forces joining the war';
     heroActivityPhase = 1 - heroActivityPhase;
   }
   setInterval(renderHeroActivity, 5000);
