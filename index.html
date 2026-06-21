@@ -122,7 +122,7 @@
     /* FLOATING BUY BUTTON */
     .floating-buy{position:fixed;right:20px;bottom:20px;z-index:90;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity 0.3s,transform 0.3s}
     .floating-buy.visible{opacity:1;transform:translateY(0);pointer-events:auto}
-    @media(max-width:768px){.floating-buy{right:14px;bottom:14px}.floating-buy .btn-primary{padding:12px 20px;font-size:0.68rem}}
+    @media(max-width:768px){.floating-buy{right:14px;bottom:14px}.floating-buy .btn-primary{padding:12px 20px;font-size:0.68rem}footer{padding-bottom:100px}}
 
     /* PRICE BADGE */
     .price-badge{display:inline-flex;align-items:center;gap:13px;border:1px solid #00e5ff36;background:#00e5ff08;border-radius:7px;padding:15px 26px;margin-bottom:28px}
@@ -169,6 +169,11 @@
     .war-card-ai.leading{border-color:#00e5ff66;box-shadow:0 0 24px #00e5ff33}
     .war-card-human.leading{border-color:#9b59b666;box-shadow:0 0 24px #9b59b633}
     .war-bar-outer{box-shadow:0 0 40px #00000060}
+    #side-ai-bar,#side-human-bar{cursor:pointer}
+    #side-ai-bar:hover{box-shadow:inset 0 0 24px #ffffff44,0 0 22px #00e5ffaa}
+    #side-human-bar:hover{box-shadow:inset 0 0 24px #ffffff33,0 0 22px #9b59b6aa}
+    .war-bar-outer.voted #side-ai-bar,.war-bar-outer.voted #side-human-bar{cursor:default;pointer-events:none}
+    .war-bar-outer.voted #side-ai-bar:hover,.war-bar-outer.voted #side-human-bar:hover{box-shadow:none}
     .bar-leading{box-shadow:inset 0 0 24px #ffffff33,0 0 26px currentColor}
     #side-ai-bar.bar-leading{color:#00e5ff}
     #side-human-bar.bar-leading{color:#9b59b6}
@@ -268,7 +273,7 @@
     .q-dot.done{background:#00e5ff44}
 
     /* FOOTER */
-    footer{border-top:1px solid #ffffff08;padding:40px 40px 32px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+    footer{border-top:1px solid #ffffff08;padding:40px 40px 110px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
     .footer-logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:0.2em;background:linear-gradient(90deg,var(--cyan),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .footer-text{font-size:0.72rem;color:var(--muted)}
     .footer-disclaimer{font-size:0.65rem;color:#333;max-width:500px;line-height:1.5}
@@ -626,7 +631,7 @@
     <p id="total-votes-label" style="font-family:&#39;Orbitron&#39;,sans-serif;font-size:0.65rem;letter-spacing:0.2em;color:var(--muted);margin-bottom:40px">2&nbsp;337 VOTES CAST</p>
 
     <!-- BAR -->
-    <div class="war-bar-outer" style="display:flex;align-items:center;justify-content:center;gap:0;max-width:700px;margin:0 auto 32px;border-radius:8px;overflow:hidden;border:1px solid #ffffff10;height:68px">
+    <div class="war-bar-outer" id="war-bar-outer" style="display:flex;align-items:center;justify-content:center;gap:0;max-width:700px;margin:0 auto 32px;border-radius:8px;overflow:hidden;border:1px solid #ffffff10;height:68px">
       <div id="side-ai-bar" style="background: linear-gradient(135deg, rgb(0, 229, 255), rgb(0, 144, 170)); height: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; transition: width 0.9s cubic-bezier(.22,.61,.36,1), box-shadow 0.4s ease; width: 53%;">
         <span style="font-family:&#39;Orbitron&#39;,sans-serif;font-weight:900;font-size:0.8rem;color:#000;letter-spacing:0.1em;white-space:nowrap">⚡ AI</span>
         <span id="ai-pct" style="font-family:&#39;Orbitron&#39;,sans-serif;font-weight:900;font-size:1.2rem;color:#000">53%</span>
@@ -856,117 +861,6 @@ if (chartEl) chartObs.observe(chartEl);
   else { img.onload = processImage; }
 })();
 
-// ── PICK A SIDE — real click votes stored in localStorage
-(function() {
-  const BASE_AI    = 1247;
-  const BASE_HUMAN = 1089;
-
-  function getVotes() {
-    return {
-      ai:    BASE_AI    + parseInt(localStorage.getItem('vs_votes_ai')    || '0'),
-      human: BASE_HUMAN + parseInt(localStorage.getItem('vs_votes_human') || '0')
-    };
-  }
-
-  function animateNumber(el, to) {
-    if (!el) return;
-    const from = parseInt(el.dataset.val || '0', 10) || 0;
-    if (from === to) { el.textContent = to.toLocaleString(); return; }
-    const duration = 700;
-    const start = performance.now();
-    function tick(now) {
-      const p = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - p, 3);
-      const val = Math.round(from + (to - from) * eased);
-      el.textContent = val.toLocaleString();
-      if (p < 1) requestAnimationFrame(tick);
-      else el.dataset.val = to;
-    }
-    el.dataset.val = from;
-    requestAnimationFrame(tick);
-  }
-
-  let heroActivityTotal = 0;
-  let heroActivityPhase = 0;
-  function renderHeroActivity() {
-    const el = document.getElementById('hero-activity-text');
-    if (!el) return;
-    el.textContent = heroActivityPhase === 0
-      ? heroActivityTotal.toLocaleString() + ' wallets have already chosen a side'
-      : 'New forces joining the war';
-    heroActivityPhase = 1 - heroActivityPhase;
-  }
-  setInterval(renderHeroActivity, 5000);
-
-  function updateDisplay(v) {
-    const total = v.ai + v.human || 1;
-    const aiPct    = Math.round(v.ai    / total * 100);
-    const humanPct = 100 - aiPct;
-    const aiBar    = document.getElementById('side-ai-bar');
-    const humanBar = document.getElementById('side-human-bar');
-    if (aiBar)    aiBar.style.width    = aiPct + '%';
-    if (humanBar) humanBar.style.width = humanPct + '%';
-    if (aiBar && humanBar) {
-      aiBar.classList.toggle('bar-leading', aiPct > humanPct);
-      humanBar.classList.toggle('bar-leading', humanPct > aiPct);
-    }
-    const aiPctEl = document.getElementById('ai-pct');
-    const hPctEl  = document.getElementById('human-pct');
-    if (aiPctEl)  aiPctEl.textContent  = aiPct + '%';
-    if (hPctEl)   hPctEl.textContent   = humanPct + '%';
-    animateNumber(document.getElementById('ai-count'), v.ai);
-    animateNumber(document.getElementById('human-count'), v.human);
-    animateNumber(document.getElementById('total-count'), v.ai + v.human);
-    const aiCard = document.querySelector('.war-card-ai');
-    const humanCard = document.querySelector('.war-card-human');
-    if (aiCard)    aiCard.classList.toggle('leading', aiPct > humanPct);
-    if (humanCard) humanCard.classList.toggle('leading', humanPct > aiPct);
-    const totalLabel = document.getElementById('total-votes-label');
-    if (totalLabel) totalLabel.textContent = (v.ai + v.human).toLocaleString() + ' VOTES CAST';
-    const winLabel = document.getElementById('winning-label');
-    if (winLabel) {
-      winLabel.textContent = 'winning';
-      winLabel.style.color = aiPct >= humanPct ? 'var(--cyan)' : 'var(--violet)';
-    }
-    heroActivityTotal = v.ai + v.human;
-    renderHeroActivity();
-  }
-
-  const myVote = localStorage.getItem('vs_my_vote');
-  const v = getVotes();
-  setTimeout(() => updateDisplay(v), 500);
-
-  if (myVote) {
-    const btns  = document.getElementById('vote-buttons');
-    const voted = document.getElementById('voted-state');
-    const msg   = document.getElementById('voted-msg');
-    if (btns)  btns.style.display  = 'none';
-    if (voted) voted.style.display = 'block';
-    if (msg)   msg.innerHTML = myVote === 'ai'
-      ? '<span style="color:var(--cyan)">⚡ YOU CHOSE AI.</span> The machine remembers.'
-      : '<span style="color:var(--violet)">🔮 YOU CHOSE HUMAN.</span> Conviction noted.';
-  }
-
-  window.castVote = function(side) {
-    if (localStorage.getItem('vs_my_vote')) return;
-    const key = side === 'ai' ? 'vs_votes_ai' : 'vs_votes_human';
-    localStorage.setItem(key, (parseInt(localStorage.getItem(key)||'0') + 1).toString());
-    localStorage.setItem('vs_my_vote', side);
-    const newV = getVotes();
-    updateDisplay(newV);
-    const bar = document.getElementById(side === 'ai' ? 'side-ai-bar' : 'side-human-bar');
-    if (bar) { bar.style.transform = 'scaleY(1.08)'; setTimeout(() => bar.style.transform = '', 300); }
-    const btns  = document.getElementById('vote-buttons');
-    const voted = document.getElementById('voted-state');
-    const msg   = document.getElementById('voted-msg');
-    if (btns)  btns.style.display  = 'none';
-    if (voted) voted.style.display = 'block';
-    if (msg)   msg.innerHTML = side === 'ai'
-      ? '<span style="color:var(--cyan)">⚡ ALIGNED WITH THE MACHINE.</span><br/>The future is automated — and you just proved it.'
-      : '<span style="color:var(--violet)">🔮 HUMAN FORCE CONFIRMED.</span><br/>Conviction over code. The fight continues.';
-  };
-})();
-
 // ── COUNTDOWN
 let cd=30;
 const cdEl=document.getElementById('refresh-countdown');
@@ -1071,6 +965,133 @@ if (robotBubble && robotBubbleText) {
     }, 400);
   }, 4800);
 }
+</script>
+
+
+<!-- VOTE SYSTEM — isolated in its own script tag so it always initializes
+     even if something earlier on the page (chart, canvas, etc.) throws -->
+<script>
+// ── PICK A SIDE — real click votes stored in localStorage
+(function() {
+  const BASE_AI    = 1247;
+  const BASE_HUMAN = 1089;
+
+  function getVotes() {
+    return {
+      ai:    BASE_AI    + parseInt(localStorage.getItem('vs_votes_ai')    || '0'),
+      human: BASE_HUMAN + parseInt(localStorage.getItem('vs_votes_human') || '0')
+    };
+  }
+
+  function animateNumber(el, to) {
+    if (!el) return;
+    const from = parseInt(el.dataset.val || '0', 10) || 0;
+    if (from === to) { el.textContent = to.toLocaleString(); return; }
+    const duration = 700;
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const val = Math.round(from + (to - from) * eased);
+      el.textContent = val.toLocaleString();
+      if (p < 1) requestAnimationFrame(tick);
+      else el.dataset.val = to;
+    }
+    el.dataset.val = from;
+    requestAnimationFrame(tick);
+  }
+
+  let heroActivityTotal = 0;
+  let heroActivityPhase = 0;
+  function renderHeroActivity() {
+    const el = document.getElementById('hero-activity-text');
+    if (!el) return;
+    el.textContent = heroActivityPhase === 0
+      ? heroActivityTotal.toLocaleString() + ' wallets have already chosen a side'
+      : 'New forces joining the war';
+    heroActivityPhase = 1 - heroActivityPhase;
+  }
+  setInterval(renderHeroActivity, 5000);
+
+  function updateDisplay(v) {
+    const total = v.ai + v.human || 1;
+    const aiPct    = Math.round(v.ai    / total * 100);
+    const humanPct = 100 - aiPct;
+    const aiBar    = document.getElementById('side-ai-bar');
+    const humanBar = document.getElementById('side-human-bar');
+    if (aiBar)    aiBar.style.width    = aiPct + '%';
+    if (humanBar) humanBar.style.width = humanPct + '%';
+    if (aiBar && humanBar) {
+      aiBar.classList.toggle('bar-leading', aiPct > humanPct);
+      humanBar.classList.toggle('bar-leading', humanPct > aiPct);
+    }
+    const aiPctEl = document.getElementById('ai-pct');
+    const hPctEl  = document.getElementById('human-pct');
+    if (aiPctEl)  aiPctEl.textContent  = aiPct + '%';
+    if (hPctEl)   hPctEl.textContent   = humanPct + '%';
+    animateNumber(document.getElementById('ai-count'), v.ai);
+    animateNumber(document.getElementById('human-count'), v.human);
+    animateNumber(document.getElementById('total-count'), v.ai + v.human);
+    const aiCard = document.querySelector('.war-card-ai');
+    const humanCard = document.querySelector('.war-card-human');
+    if (aiCard)    aiCard.classList.toggle('leading', aiPct > humanPct);
+    if (humanCard) humanCard.classList.toggle('leading', humanPct > aiPct);
+    const totalLabel = document.getElementById('total-votes-label');
+    if (totalLabel) totalLabel.textContent = (v.ai + v.human).toLocaleString() + ' VOTES CAST';
+    const winLabel = document.getElementById('winning-label');
+    if (winLabel) {
+      winLabel.textContent = 'winning';
+      winLabel.style.color = aiPct >= humanPct ? 'var(--cyan)' : 'var(--violet)';
+    }
+    heroActivityTotal = v.ai + v.human;
+    renderHeroActivity();
+  }
+
+  const myVote = localStorage.getItem('vs_my_vote');
+  const v = getVotes();
+  setTimeout(() => updateDisplay(v), 500);
+
+  if (myVote) {
+    const btns  = document.getElementById('vote-buttons');
+    const voted = document.getElementById('voted-state');
+    const msg   = document.getElementById('voted-msg');
+    const barOuter = document.getElementById('war-bar-outer');
+    if (btns)  btns.style.display  = 'none';
+    if (voted) voted.style.display = 'block';
+    if (barOuter) barOuter.classList.add('voted');
+    if (msg)   msg.innerHTML = myVote === 'ai'
+      ? '<span style="color:var(--cyan)">⚡ YOU CHOSE AI.</span> The machine remembers.'
+      : '<span style="color:var(--violet)">🧠 YOU CHOSE HUMAN.</span> Conviction over code.';
+  }
+
+  window.castVote = function(side) {
+    if (localStorage.getItem('vs_my_vote')) return;
+    const key = side === 'ai' ? 'vs_votes_ai' : 'vs_votes_human';
+    localStorage.setItem(key, (parseInt(localStorage.getItem(key)||'0') + 1).toString());
+    localStorage.setItem('vs_my_vote', side);
+    const newV = getVotes();
+    updateDisplay(newV);
+    const bar = document.getElementById(side === 'ai' ? 'side-ai-bar' : 'side-human-bar');
+    if (bar) { bar.style.transform = 'scaleY(1.08)'; setTimeout(() => bar.style.transform = '', 300); }
+    const btns  = document.getElementById('vote-buttons');
+    const voted = document.getElementById('voted-state');
+    const msg   = document.getElementById('voted-msg');
+    const barOuter = document.getElementById('war-bar-outer');
+    if (btns)  btns.style.display  = 'none';
+    if (voted) voted.style.display = 'block';
+    if (barOuter) barOuter.classList.add('voted');
+    if (msg)   msg.innerHTML = side === 'ai'
+      ? '<span style="color:var(--cyan)">⚡ YOU CHOSE AI.</span> The machine remembers.'
+      : '<span style="color:var(--violet)">🧠 YOU CHOSE HUMAN.</span> Conviction over code.';
+  };
+
+  // ── BAR CLICK-TO-VOTE — full-half clickable area, reuses window.castVote (no duplicate logic)
+  const aiBarEl    = document.getElementById('side-ai-bar');
+  const humanBarEl = document.getElementById('side-human-bar');
+  if (aiBarEl)    aiBarEl.addEventListener('click', () => window.castVote('ai'));
+  if (humanBarEl) humanBarEl.addEventListener('click', () => window.castVote('human'));
+})();
+
 </script>
 
 </body></html>
